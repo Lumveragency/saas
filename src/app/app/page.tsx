@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getEntitlement } from "@/lib/entitlements";
-import { AnalyzeForm } from "@/components/AnalyzeForm";
+import { prisma } from "@/lib/db";
+import { Workspace } from "@/components/app/Workspace";
 
-export const metadata = { title: "New analysis — MarketScan" };
+export const metadata = { title: "Research — MarketScan" };
+
+const EXAMPLES = [
+  "Will a crewed mission land on the Moon before the end of 2027?",
+  "Will global EV sales exceed 20 million units in 2026?",
+  "Will the US Federal Reserve cut rates at its next scheduled meeting?",
+];
 
 export default async function AppHome({
   searchParams,
@@ -14,49 +21,58 @@ export default async function AppHome({
   const entitlement = await getEntitlement(user);
   const { q } = await searchParams;
 
-  const remaining = Math.max(entitlement.limit - entitlement.used, 0);
+  const recent = await prisma.forecast.findMany({
+    where: { userId: user.id, status: "complete" },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  });
 
   return (
-    <div className="container-page py-10 sm:py-14">
-      <div className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-[-0.02em]">New analysis</h1>
-            <p className="mt-1 text-sm text-muted">
-              Ask about a future event and get an evidence-backed probability.
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-muted">{entitlement.plan.name} plan</div>
-            <div className="text-sm font-medium tabular-nums">
-              {entitlement.isSubscriber
-                ? `${remaining} of ${entitlement.limit} left`
-                : entitlement.canAnalyze
-                  ? "1 free analysis"
-                  : "Free analysis used"}
-            </div>
-          </div>
-        </div>
+    <div className="mx-auto max-w-3xl px-5 py-10 sm:py-16">
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold tracking-[-0.025em] sm:text-4xl">
+          Analyze a prediction
+        </h1>
+        <p className="mx-auto mt-2 max-w-lg text-[15px] text-muted">
+          Upload a screenshot of a prediction market or future-event question. MarketScan reads
+          it, researches the evidence, and returns a transparent probability estimate.
+        </p>
+      </header>
 
-        <div className="card mt-8 p-6">
-          <AnalyzeForm
-            initialQuestion={q ?? ""}
-            autostart={!!q}
-            canAnalyze={entitlement.canAnalyze}
-          />
-        </div>
+      <Workspace
+        canAnalyze={entitlement.canAnalyze}
+        examples={EXAMPLES}
+        initialQuestion={q ?? ""}
+        autostart={!!q}
+      />
 
-        <div className="mt-6 flex items-center justify-between text-sm">
-          <Link href="/app/history" className="text-accent hover:underline">
-            View past reports →
-          </Link>
-          {!entitlement.isSubscriber && (
-            <Link href="/pricing" className="text-muted hover:text-ink">
-              Upgrade to Pro
+      {recent.length > 0 && (
+        <section className="mt-14">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Recent reports</h2>
+            <Link href="/app/history" className="text-xs font-medium text-accent hover:underline">
+              View all
             </Link>
-          )}
-        </div>
-      </div>
+          </div>
+          <ul className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+            {recent.map((f) => (
+              <li key={f.id}>
+                <Link
+                  href={`/app/reports/${f.id}`}
+                  className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-black/[0.015]"
+                >
+                  <span className="truncate text-sm text-ink">{f.question}</span>
+                  {f.yesProbability !== null && (
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-accent">
+                      {f.yesProbability}%
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

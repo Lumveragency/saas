@@ -58,6 +58,14 @@ model Forecast {
   clarification  String?
   errorMessage   String?
 
+  // User can bookmark a completed report to their Saved list.
+  saved Boolean @default(false)
+
+  // Screenshot-sourced metadata (when the analysis started from an upload).
+  source           String  @default("text") // text | screenshot
+  platform         String? // e.g. Polymarket, Kalshi, Metaculus (as read from the image)
+  marketImpliedYes Int?    // market-implied YES % visible in the screenshot, if any
+
   // Internal cost tracking (cents). Never exposed to end users.
   estimatedCostCents Int @default(0)
   webSearchCount     Int @default(0)

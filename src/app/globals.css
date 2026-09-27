@@ -37,21 +37,38 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium
-      transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold
+      transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-accent px-4 py-2.5 text-white hover:bg-accent-hover;
+    @apply btn bg-accent px-5 py-2.5 text-white shadow-[0_6px_16px_-4px_rgba(37,99,235,0.5)]
+      hover:bg-accent-hover hover:shadow-[0_8px_22px_-6px_rgba(37,99,235,0.6)];
   }
   .btn-secondary {
-    @apply btn border border-line bg-surface px-4 py-2.5 text-ink hover:bg-black/[0.02];
+    @apply btn border border-line bg-surface px-5 py-2.5 text-ink hover:bg-black/[0.02];
   }
   .btn-ghost {
     @apply btn px-3 py-2 text-muted hover:text-ink;
   }
+  /* Inverted primary for use on the blue hero. */
+  .btn-on-blue {
+    @apply btn bg-white px-5 py-2.5 text-accent shadow-sm hover:bg-white/90;
+  }
 
   .card {
     @apply rounded-xl border border-line bg-surface shadow-card;
+  }
+
+  /* Saturated royal-blue hero band (polifly-inspired energy). */
+  .hero-blue {
+    background:
+      radial-gradient(120% 90% at 50% -10%, #3B82F6 0%, transparent 55%),
+      linear-gradient(180deg, #2563EB 0%, #1D4ED8 55%, #1E40AF 100%);
+  }
+  /* Subtle star/dot texture overlay for the hero. */
+  .hero-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.4px);
+    background-size: 26px 26px;
   }
 
   .input {

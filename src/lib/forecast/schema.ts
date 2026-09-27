@@ -52,6 +52,24 @@ export const ParseResultSchema = z.object({
 });
 export type ParseResult = z.infer<typeof ParseResultSchema>;
 
+// ---------------------------------------------------------------------------
+// Screenshot extraction (vision stage). The model reads a prediction-market
+// screenshot and reports what it can actually see — never invents fields.
+// ---------------------------------------------------------------------------
+export const ExtractionSchema = z.object({
+  clear: z.boolean(),
+  // When clear is false: a specific reason / what to re-upload.
+  reason: z.string().max(400).optional(),
+  question: z.string().max(400).optional(),
+  yesDefinition: z.string().max(600).optional(),
+  noDefinition: z.string().max(600).optional(),
+  deadline: z.string().max(120).optional(),
+  platform: z.string().max(80).optional(),
+  // Market-implied YES probability visible in the image (0-100), or null.
+  marketImpliedYes: z.number().int().min(0).max(100).nullable().optional(),
+});
+export type Extraction = z.infer<typeof ExtractionSchema>;
+
 export const ForecastSchema = z
   .object({
     question: z.string().min(1),

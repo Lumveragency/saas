@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { SiteNav } from "@/components/marketing/SiteNav";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
-import { LandingSearch } from "@/components/LandingSearch";
 import { PricingCards } from "@/components/marketing/PricingCards";
 import { ProbabilityMeter } from "@/components/ProbabilityMeter";
 import { SAMPLE_FORECAST } from "@/lib/forecast/sample";
@@ -10,13 +9,13 @@ import { SAMPLE_FORECAST } from "@/lib/forecast/sample";
 const HOW = [
   {
     n: "01",
-    title: "Ask a clear question",
-    body: "State a future event and a deadline. MarketScan checks that it has a clear YES/NO outcome, and asks for clarification when it doesn't.",
+    title: "Upload a screenshot",
+    body: "Drop in a screenshot of a prediction market or a future-event question. MarketScan reads the question, outcomes, deadline, and any displayed price.",
   },
   {
     n: "02",
     title: "AI researches the evidence",
-    body: "It searches current sources, separates evidence for and against, and weighs reliability — instead of guessing from a single prompt.",
+    body: "It searches current sources, separates evidence for and against, and weighs reliability — instead of copying the market price.",
   },
   {
     n: "03",
@@ -27,8 +26,12 @@ const HOW = [
 
 const FAQ = [
   {
+    q: "How does the screenshot upload work?",
+    a: "Upload a screenshot of a prediction-market or future-event question. A vision model reads the question, outcomes, deadline, and any displayed probability — reporting only what's actually visible. You confirm or correct the question before research begins.",
+  },
+  {
     q: "How is the probability calculated?",
-    a: "MarketScan interprets your question, researches current information with live web search, separates supporting and contrary evidence, and produces a probability grounded in what it found. Every estimate is clearly labeled as an AI-generated estimate.",
+    a: "MarketScan researches current information with live web search, separates supporting and contrary evidence, and produces a probability grounded in what it found. It never simply copies the market price — that's shown separately for comparison. Every estimate is labeled as an AI-generated estimate.",
   },
   {
     q: "Is this a prediction market or betting product?",
@@ -51,24 +54,55 @@ export default async function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteNav authed={authed} />
-
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="container-page pt-20 pb-16 sm:pt-28">
-          <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] sm:text-5xl">
-              Understand what&apos;s likely to happen.
+      {/* Blue hero band with the nav overlaid on top */}
+      <div className="relative overflow-hidden hero-blue">
+        <div className="absolute inset-0 hero-dots opacity-60" aria-hidden />
+        <SiteNav authed={authed} onDark />
+        <section className="container-page relative pt-28 pb-20 sm:pt-36 sm:pb-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur">
+              AI research for future events — not a betting product
+            </span>
+            <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-[-0.035em] text-white sm:text-[68px]">
+              Understand what&apos;s
+              <br className="hidden sm:block" /> likely to happen.
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-muted">
-              Research future events with AI. Explore the evidence, understand the
-              uncertainty, and get a transparent probability estimate.
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/80">
+              Upload a screenshot of any prediction. MarketScan reads it, researches the
+              evidence, and returns a transparent probability estimate.
             </p>
           </div>
-          <div className="mt-10">
-            <LandingSearch authed={authed} />
+
+          {/* Screenshot-upload call to action */}
+          <div className="mx-auto mt-10 max-w-xl">
+            <Link
+              href={authed ? "/app" : "/signup"}
+              className="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/10 px-6 py-12 text-center backdrop-blur transition-colors hover:border-white/70 hover:bg-white/15"
+            >
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-white text-accent">
+                <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+                  <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                </svg>
+              </span>
+              <span className="mt-4 text-base font-semibold text-white">
+                Upload a prediction screenshot
+              </span>
+              <span className="mt-1.5 text-sm text-white/70">
+                Get an AI-powered research report with probabilities and evidence.
+              </span>
+              <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-accent">
+                {authed ? "Open workspace" : "Get started free"} →
+              </span>
+            </Link>
+            <p className="mt-3 text-center text-xs text-white/70">
+              AI-generated forecasts are estimates, not guarantees.
+            </p>
           </div>
         </section>
+      </div>
+
+      <main className="flex-1">
 
         {/* How it works */}
         <section id="how-it-works" className="border-t border-line bg-surface">

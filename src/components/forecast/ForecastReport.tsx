@@ -78,8 +78,18 @@ function EvidenceList({
   );
 }
 
-export function ForecastReport({ forecast }: { forecast: Forecast }) {
+export function ForecastReport({
+  forecast,
+  marketImpliedYes = null,
+  platform = null,
+}: {
+  forecast: Forecast;
+  marketImpliedYes?: number | null;
+  platform?: string | null;
+}) {
   const f = forecast;
+  const hasMarket = marketImpliedYes !== null && marketImpliedYes !== undefined;
+  const delta = hasMarket ? f.yesProbability - (marketImpliedYes as number) : 0;
   return (
     <div className="space-y-8">
       {/* A. Summary */}
@@ -91,6 +101,32 @@ export function ForecastReport({ forecast }: { forecast: Forecast }) {
         <div className="mt-6 border-t border-line pt-6">
           <ProbabilityMeter yes={f.yesProbability} no={f.noProbability} confidence={f.confidence} />
         </div>
+
+        {hasMarket && f.confidence !== "insufficient" && (
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-5">
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-muted">
+                MarketScan estimate
+              </div>
+              <div className="text-lg font-semibold tabular-nums text-accent">
+                {f.yesProbability}% YES
+              </div>
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-muted">
+                Market-implied{platform ? ` · ${platform}` : ""}
+              </div>
+              <div className="text-lg font-semibold tabular-nums text-ink">
+                {marketImpliedYes}% YES
+              </div>
+            </div>
+            <div className="text-xs text-muted">
+              {delta === 0
+                ? "In line with the market."
+                : `${Math.abs(delta)} pts ${delta > 0 ? "above" : "below"} the market price.`}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* B. Explanation */}

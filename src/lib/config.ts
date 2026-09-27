@@ -9,6 +9,8 @@ export const config = {
     apiKey: process.env.ANTHROPIC_API_KEY ?? "",
     forecastModel: process.env.FORECAST_MODEL ?? "claude-sonnet-5",
     parserModel: process.env.PARSER_MODEL ?? "claude-haiku-4-5-20251001",
+    // Vision-capable model used to read prediction screenshots.
+    extractModel: process.env.EXTRACT_MODEL ?? "claude-sonnet-5",
     maxWebSearches: intFromEnv(process.env.MAX_WEB_SEARCHES, 6),
   },
 
@@ -24,6 +26,7 @@ export const config = {
     scaleMonthly: intFromEnv(process.env.SCALE_MONTHLY_LIMIT, 500),
     maxQuestionLength: 280,
     minQuestionLength: 12,
+    maxImageBytes: 6 * 1024 * 1024, // 6 MB
   },
 } as const;
 

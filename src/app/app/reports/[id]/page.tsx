@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ForecastSchema } from "@/lib/forecast/schema";
 import { ForecastReport } from "@/components/forecast/ForecastReport";
+import { SaveButton } from "@/components/app/SaveButton";
 
 export const metadata = { title: "Forecast report — MarketScan" };
 
@@ -21,21 +22,31 @@ export default async function ReportPage({
   return (
     <div className="container-page py-8 sm:py-12">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-6 flex items-center justify-between text-sm">
+        <div className="mb-6 flex items-center justify-between gap-4 text-sm">
           <Link href="/app/history" className="text-muted hover:text-ink">
             ← All reports
           </Link>
-          <span className="text-xs text-muted">
-            {new Date(record.createdAt).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted">
+              {new Date(record.createdAt).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+            {record.status === "complete" && (
+              <SaveButton id={record.id} initialSaved={record.saved} />
+            )}
+          </div>
         </div>
 
         {record.status === "complete" && record.result ? (
-          <ReportBody json={record.result} question={record.question} />
+          <ReportBody
+            json={record.result}
+            question={record.question}
+            marketImpliedYes={record.marketImpliedYes}
+            platform={record.platform}
+          />
         ) : record.status === "needs_clarification" ? (
           <StatusCard
             tone="amber"
@@ -63,7 +74,17 @@ export default async function ReportPage({
   );
 }
 
-function ReportBody({ json, question }: { json: string; question: string }) {
+function ReportBody({
+  json,
+  question,
+  marketImpliedYes,
+  platform,
+}: {
+  json: string;
+  question: string;
+  marketImpliedYes: number | null;
+  platform: string | null;
+}) {
   const parsed = ForecastSchema.safeParse(JSON.parse(json));
   if (!parsed.success) {
     return (
@@ -75,7 +96,13 @@ function ReportBody({ json, question }: { json: string; question: string }) {
       />
     );
   }
-  return <ForecastReport forecast={parsed.data} />;
+  return (
+    <ForecastReport
+      forecast={parsed.data}
+      marketImpliedYes={marketImpliedYes}
+      platform={platform}
+    />
+  );
 }
 
 function StatusCard({

@@ -23,10 +23,12 @@ export function AnalyzeForm({
   initialQuestion = "",
   autostart = false,
   canAnalyze,
+  examples = [],
 }: {
   initialQuestion?: string;
   autostart?: boolean;
   canAnalyze: boolean;
+  examples?: string[];
 }) {
   const router = useRouter();
   const [question, setQuestion] = useState(initialQuestion);
@@ -138,6 +140,29 @@ export function AnalyzeForm({
           AI-generated forecasts are estimates, not guarantees.
         </p>
       </form>
+
+      {examples.length > 0 && state.kind === "idle" && canAnalyze && (
+        <div className="mt-6">
+          <p className="mb-2.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
+            Example questions
+          </p>
+          <div className="flex flex-col gap-2">
+            {examples.map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => setQuestion(ex)}
+                className="group flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3.5 py-2.5 text-left text-sm text-ink transition-colors hover:border-accent/40 hover:bg-accent-soft/40"
+              >
+                <span>{ex}</span>
+                <span className="shrink-0 text-xs text-muted opacity-0 transition-opacity group-hover:opacity-100">
+                  Use →
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!canAnalyze && state.kind === "idle" && (
         <div className="card mt-6 border-l-2 border-l-accent p-5">
