@@ -1,0 +1,69 @@
+// MarketScan database schema.
+// Default provider is SQLite for zero-config local development.
+// For production, switch provider to "postgresql" and update DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Free tier: exactly one free analysis before a subscription is required.
+  freeAnalysesUsed Int @default(0)
+
+  // Stripe / subscription state. Never trusted from the client — only written
+  // by server-side Stripe webhook handlers and checkout flows.
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  plan                 String    @default("free") // free | pro | scale
+  subscriptionStatus   String?   // trialing | active | past_due | canceled | incomplete
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+
+  forecasts Forecast[]
+
+  @@index([stripeCustomerId])
+}
+
+model Forecast {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  question String
+
+  // pending | researching | complete | needs_clarification | insufficient_evidence | error
+  status String @default("pending")
+
+  // Parsed question structure (JSON string).
+  parsed String?
+
+  // Full structured forecast (JSON string) — see lib/forecast/schema.ts.
+  result String?
+
+  // Denormalized fields for fast history listing.
+  yesProbability Int?
+  confidence     String?
+  clarification  String?
+  errorMessage   String?
+
+  // Internal cost tracking (cents). Never exposed to end users.
+  estimatedCostCents Int @default(0)
+  webSearchCount     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
